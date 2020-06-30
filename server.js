@@ -48,4 +48,4 @@ app.delete("/messages/:id", (req, res) => {
   res.send(messages);
 });
 
-app.listen(process.env.PORT);
+app.listen(process.env.PORT || 4000);
