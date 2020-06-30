@@ -29,7 +29,7 @@ app.post("/messages", (req, res) => {
     ? res.send("Sorry! Please complete all the fields.").sendStatus(400)
     : messages.push({
         id: messages.length + 1,
-        name: req.body.from,
+        from: req.body.from,
         text: req.body.text,
       });
   // res.send({"success": true})
