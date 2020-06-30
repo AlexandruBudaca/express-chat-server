@@ -28,9 +28,8 @@ app.post("/messages", (req, res) => {
   req.body.from === "" || req.body.text === ""
     ? res.send("Sorry! Please complete all the fields.").sendStatus(400)
     : messages.push({
-        id:
-          message.id === message.id ? messages.length + 1 : messages.length + 1,
-        from: req.body.from,
+        id: messages.length - 1 + 1,
+        name: req.body.from,
         text: req.body.text,
       });
   // res.send({"success": true})
