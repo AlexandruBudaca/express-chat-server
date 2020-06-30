@@ -28,7 +28,7 @@ app.post("/messages", (req, res) => {
   req.body.from === "" || req.body.text === ""
     ? res.send("Sorry! Please complete all the fields.").sendStatus(400)
     : messages.push({
-        id: messages.map((id) => {
+        id: messages.find((id) => {
           messages.id === id.id ? messages.length - 1 + 1 : messages.length + 1;
         }),
 
