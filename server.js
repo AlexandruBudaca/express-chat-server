@@ -30,7 +30,7 @@ app.get("/messages", (req, res)=> {
 app.post("/messages", (req, res)=> {
   req.body.from === "" || req.body.text === "" ? res.send("Sorry! Please complete all the fields.").sendStatus(400) :
   messages.push( 
-    {"id": Math.floor(Math.random() * Math.floor(messages.length + 100) , messages.length ), "name": req.body.from, "text": req.body.text, "timeSent": new Date().toUTCString()}
+    {"id": Math.floor(Math.random() * Math.floor(messages.length + 100) , messages.length ), "from": req.body.from, "text": req.body.text, "timeSent": new Date().toUTCString()}
   )
   // res.send({"success": true})
  messages.map(id=> {id.id === messages.id ? id.id +=1 : null})
