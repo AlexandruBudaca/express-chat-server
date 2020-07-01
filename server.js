@@ -10,6 +10,7 @@ const welcomeMessage = {
   id: 0,
   from: "Bart",
   text: "Welcome to CYF chat system!",
+  timeSent: new Date().toUTCString(),
 };
 app.use(express.json());
 
@@ -28,14 +29,18 @@ app.post("/messages", (req, res) => {
   req.body.from === "" || req.body.text === ""
     ? res.send("Sorry! Please complete all the fields.").sendStatus(400)
     : messages.push({
-        id: messages.find((id) => {
-          messages.id === id.id ? messages.length - 1 + 1 : messages.length + 1;
-        }),
-
+        id: Math.floor(
+          Math.random() * Math.floor(messages.length + 100),
+          messages.length
+        ),
         name: req.body.from,
         text: req.body.text,
+        timeSent: new Date().toUTCString(),
       });
   // res.send({"success": true})
+  messages.map((id) => {
+    id.id === messages.id ? (id.id += 1) : null;
+  });
 });
 
 app.get("/messages/:id", (req, res) => {
@@ -50,5 +55,31 @@ app.delete("/messages/:id", (req, res) => {
   messages = messages.filter((mess) => mess.id !== delMess);
   res.send(messages);
 });
+app.get("/search?", (req, res) => {
+  const searchTerm = req.query.term;
+  const searchedMess = messages.find(
+    (mess) =>
+      mess.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mess.text.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  !searchedMess ? res.sendStatus(404) : res.send(searchedMess);
+});
+app.get("/latest", (req, res) => {
+  res.send(messages.slice(-10, messages.length));
+});
+app.put("update/:id", (req, res) => {
+  const reqId = Number(req.params.id);
 
-app.listen(process.env.PORT || 4000);
+  let message = messages.find((mess) => mess.id === reqId);
+  const index = messages.indexOf(message);
+
+  const keys = Object.keys(req.body);
+
+  keys.forEach((key) => {
+    message[key] = req.body[key];
+  });
+  messages[index] = message;
+  res.json(messages[index]);
+});
+
+app.listen(process.env.PORT);
