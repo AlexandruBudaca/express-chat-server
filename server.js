@@ -8,9 +8,9 @@ app.use(body.json());
 app.use(express.urlencoded({ extended: false }));
 const welcomeMessage = {
   id: 0,
-  from: "Bart",
+  from: "Alex",
   text: "Welcome to CYF chat system!",
-  timeSent: new Date().toUTCString(),
+  timeSent: new Date().toUTCString()
 };
 app.use(express.json());
 
@@ -19,7 +19,7 @@ app.use(express.json());
 //Note: messages will be lost when Glitch restarts our server.
 let messages = [welcomeMessage];
 
-app.get("/", function (request, response) {
+app.get("/", function(request, response) {
   response.sendFile(__dirname + "/index.html");
 });
 app.get("/messages", (req, res) => {
@@ -35,7 +35,7 @@ app.post("/messages", (req, res) => {
         ),
         from: req.body.from,
         text: req.body.text,
-        timeSent: new Date().toUTCString(),
+        timeSent: new Date().toUTCString()
       });
   // res.send({"success": true})
 });
@@ -43,19 +43,19 @@ app.post("/messages", (req, res) => {
 app.get("/messages/:id", (req, res) => {
   const messId = req.params.id;
   const FilterMessages = messages.filter(
-    (mess) => Number(mess.id) === Number(messId)
+    mess => Number(mess.id) === Number(messId)
   );
   res.send(FilterMessages);
 });
 app.delete("/messages/:id", (req, res) => {
   const delMess = Number(req.params.id);
-  messages = messages.filter((mess) => mess.id !== delMess);
+  messages = messages.filter(mess => mess.id !== delMess);
   res.send(messages);
 });
 app.get("/search?", (req, res) => {
   const searchTerm = req.query.term;
   const searchedMess = messages.find(
-    (mess) =>
+    mess =>
       mess.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
       mess.text.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -67,8 +67,7 @@ app.get("/latest", (req, res) => {
 app.put("/update/:id", (req, res) => {
   const reqId = Number(req.params.id);
 
-  let message = messages.find((mess) => mess.id === reqId);
-  const index = messages.indexOf(message);
+  let message = messages.find(mess => mess.id === reqId);
 
   if (message) {
     message.from = req.body.from;
