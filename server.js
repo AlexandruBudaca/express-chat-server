@@ -27,7 +27,7 @@ app.get("/messages", (req, res) => {
 });
 app.post("/messages", (req, res) => {
   req.body.from === "" || req.body.text === ""
-    ? res.send("Sorry! Please complete all the fields.").sendStatus(400)
+    ? res.sendStatus(400)
     : messages.push({
         id: Math.floor(
           Math.random() * Math.floor(messages.length + 100),
@@ -71,8 +71,14 @@ app.put("/update/:id", (req, res) => {
   const index = messages.indexOf(message);
 
   if (message) {
-    message.from = req.body.from;
-    message.text = req.body.text;
+    let messUpdate = {
+      id: message.id,
+      from: req.body.from,
+      text: req.body.text,
+      timeSent: message.timeSent,
+    };
+    messages.splice(index, 1, messUpdate);
+    res.json(message);
   } else {
     res.sendStatus(400);
   }
