@@ -31,6 +31,7 @@ app.post("/messages", (req, res) => {
   client.connect(function () {
     const db = client.db("chat");
     const collection = db.collection("messages");
+
     const message = {
       timeSent: new Date().toUTCString(),
     };
@@ -47,9 +48,6 @@ app.post("/messages", (req, res) => {
     }
 
     collection.insertOne(message, (error, message) => {
-      if (message) {
-        res.send({ message: "successful" });
-      }
       res.send(error || message);
       client.close();
     });
