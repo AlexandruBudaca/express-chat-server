@@ -11,7 +11,7 @@ app.use(express.json());
 dotenv.config();
 const uri = process.env.DATABASE_URI;
 
-app.get("/messages", (req, res) => {
+app.get("/", (req, res) => {
   const client = new mongodb.MongoClient(uri);
 
   client.connect(function () {
@@ -25,7 +25,7 @@ app.get("/messages", (req, res) => {
   });
 });
 
-app.post("/messages/post", (req, res) => {
+app.post("/messages", (req, res) => {
   const client = new mongodb.MongoClient(uri);
 
   client.connect(function () {
