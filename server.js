@@ -114,11 +114,7 @@ app.put("/message/update/:id", (req, res) => {
       error,
       result
     ) {
-      if (result.deletedCount === 0) {
-        res.sendStatus(422);
-      } else {
-        res.send(error || { message: "Message was updated!" } || 404);
-      }
+      res.send(error || result.value || 404);
 
       client.close();
     });
