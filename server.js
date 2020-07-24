@@ -3,14 +3,13 @@ const cors = require("cors");
 const body = require("body-parser");
 const app = express();
 const mongodb = require("mongodb");
-
+const dotenv = require("dotenv");
 app.use(cors());
 app.use(body.json());
 app.use(express.urlencoded({ extended: false }));
-const uri =
-  "mongodb+srv://AlexandruBudaca:Selet10!@alex.njtpl.mongodb.net/chat?retryWrites=true&w=majority";
-
 app.use(express.json());
+dotenv.config();
+const uri = process.env.DATABASE_URI;
 
 app.get("/messages", (req, res) => {
   const client = new mongodb.MongoClient(uri);
@@ -85,23 +84,45 @@ app.delete("/messages/:id", (req, res) => {
   });
 });
 
-app.put("/update/:id", (req, res) => {
-  const reqId = Number(req.params.id);
+app.put("/message/update/:id", (req, res) => {
+  const client = new mongodb.MongoClient(uri);
 
-  let message = messages.find((mess) => mess.id === reqId);
+  client.connect(() => {
+    const db = client.db("chat");
+    const collection = db.collection("messages");
+    let id;
+    try {
+      id = new mongodb.ObjectID(req.params.id);
+    } catch (error) {
+      res.sendStatus(400);
+      return;
+    }
 
-  if (message) {
-    let messUpdate = {
-      id: message.id,
-      from: req.body.from,
-      text: req.body.text,
-      timeSent: message.timeSent,
+    const searchObject = { _id: id };
+
+    const { from, text } = req.body;
+
+    const updateObject = {
+      $set: {
+        from: from,
+        text: text,
+      },
     };
-    messages.splice(index, 1, messUpdate);
-    res.json(message);
-  } else {
-    res.sendStatus(400);
-  }
+    const options = { returnOriginal: false };
+
+    collection.findOneAndUpdate(searchObject, updateObject, options, function (
+      error,
+      result
+    ) {
+      if (result.deletedCount === 0) {
+        res.sendStatus(422);
+      } else {
+        res.send(error || { message: "Message was updated!" } || 404);
+      }
+
+      client.close();
+    });
+  });
 });
 
 const port = process.env.PORT || 5000;
