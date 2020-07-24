@@ -2,63 +2,89 @@ const express = require("express");
 const cors = require("cors");
 const body = require("body-parser");
 const app = express();
+const mongodb = require("mongodb");
 
 app.use(cors());
 app.use(body.json());
 app.use(express.urlencoded({ extended: false }));
-const welcomeMessage = {
-  id: 0,
-  from: "Alex",
-  text: "Welcome to CYF chat system!",
-  timeSent: new Date().toUTCString(),
-};
+const uri =
+  "mongodb+srv://AlexandruBudaca:Selet10!@alex.njtpl.mongodb.net/chat?retryWrites=true&w=majority";
+
 app.use(express.json());
 
-app.get("/", function (request, response) {
-  response.sendFile(__dirname + "/index.html");
-});
 app.get("/messages", (req, res) => {
-  res.send(messages);
-});
-app.post("/messages", (req, res) => {
-  req.body.from === "" || req.body.text === ""
-    ? res.sendStatus(400)
-    : messages.push({
-        id: Math.floor(
-          Math.random() * Math.floor(messages.length + 100),
-          messages.length
-        ),
-        from: req.body.from,
-        text: req.body.text,
-        timeSent: new Date().toUTCString(),
-      });
-  // res.send({"success": true})
+  const client = new mongodb.MongoClient(uri);
+
+  client.connect(function () {
+    const db = client.db("chat");
+    const collection = db.collection("messages");
+
+    collection.find().toArray(function (error, messages) {
+      res.send(error || messages);
+      client.close();
+    });
+  });
 });
 
-app.get("/messages/:id", (req, res) => {
-  const messId = req.params.id;
-  const FilterMessages = messages.filter(
-    (mess) => Number(mess.id) === Number(messId)
-  );
-  res.send(FilterMessages);
+app.post("/messages", (req, res) => {
+  const client = new mongodb.MongoClient(uri);
+
+  client.connect(function () {
+    const db = client.db("chat");
+    const collection = db.collection("messages");
+    const message = {
+      timeSent: new Date().toUTCString(),
+    };
+
+    if (req.body.from) {
+      message["from"] = req.body.from;
+    } else {
+      res.sendStatus(400);
+    }
+    if (req.body.text) {
+      message["text"] = req.body.text;
+    } else {
+      res.sendStatus(400);
+    }
+
+    collection.insertOne(message, (error, message) => {
+      if (message) {
+        res.send({ message: "successful" });
+      }
+      res.send(error || message);
+      client.close();
+    });
+  });
 });
+
 app.delete("/messages/:id", (req, res) => {
-  const delMess = Number(req.params.id);
-  messages = messages.filter((mess) => mess.id !== delMess);
-  res.send(messages);
+  const client = new mongodb.MongoClient(uri);
+
+  client.connect(() => {
+    const db = client.db("chat");
+    const collection = db.collection("messages");
+    let id;
+    try {
+      id = new mongodb.ObjectID(req.params.id);
+    } catch (error) {
+      res.sendStatus(400);
+      return;
+    }
+    const searchMessageId = { _id: id };
+    collection.deleteOne(searchMessageId, (error, message) => {
+      if (error) {
+        res.send(error);
+      }
+      if (message.deletedCount === 0) {
+        res.sendStatus(400);
+      } else {
+        res.send({ message: "Message deleted successfully!" });
+      }
+      console.log(message.deletedCount);
+    });
+  });
 });
-app.get("/search?", (req, res) => {
-  const searchTerm = req.query.term;
-  const searchedMess = messages.find(
-    (mess) =>
-      mess.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mess.text.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  !searchedMess ? res.sendStatus(404) : res.send(searchedMess);
-});
-app.get("/latest", (req, res) => {
-  res.send(messages.slice(-10, messages.length));
-});
+
 app.put("/update/:id", (req, res) => {
   const reqId = Number(req.params.id);
 
@@ -78,4 +104,7 @@ app.put("/update/:id", (req, res) => {
   }
 });
 
-app.listen(process.env.PORT);
+const port = process.env.PORT || 5000;
+app.listen(port, function () {
+  console.log(`Running at \`http://localhost:${port}\`...`);
+});
