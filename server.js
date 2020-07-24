@@ -120,7 +120,6 @@ app.put("/message/update/:id", (req, res) => {
   });
 });
 
-const port = process.env.PORT || 8000;
-app.listen(port, function () {
-  console.log(`Running at \`http://localhost:${port}\`...`);
+app.listen(process.env.PORT || 8000, function () {
+  console.log(`Running ...`);
 });
