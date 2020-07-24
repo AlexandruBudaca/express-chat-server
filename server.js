@@ -25,7 +25,7 @@ app.get("/messages", (req, res) => {
   });
 });
 
-app.post("/messages", (req, res) => {
+app.post("/messages/post", (req, res) => {
   const client = new mongodb.MongoClient(uri);
 
   client.connect(function () {
