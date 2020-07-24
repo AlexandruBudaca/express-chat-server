@@ -115,13 +115,12 @@ app.put("/message/update/:id", (req, res) => {
       result
     ) {
       res.send(error || result.value || 404);
-
       client.close();
     });
   });
 });
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8000;
 app.listen(port, function () {
   console.log(`Running at \`http://localhost:${port}\`...`);
 });
